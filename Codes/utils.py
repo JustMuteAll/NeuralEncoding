@@ -28,6 +28,7 @@ class ImageDataset(Dataset):
             image = self.transform(image)
         return image
 
+
 def load_pretrained_model(model_name, weights_available=False, weights_path=None):
     # Dynamically import the module based on the model_name
     model_module = importlib.import_module(f'torchvision.models')
@@ -41,6 +42,7 @@ def load_pretrained_model(model_name, weights_available=False, weights_path=None
     else:
         model = model_class(pretrained=True)
     return model    
+
 
 def Load_images(path):
     image_paths = []
@@ -128,6 +130,7 @@ def Register_hook(model, model_name, layer_name,fn):
         elif layer_name == 'midlayer':
             model.encoder.layers.encoder_layer_13.ln_1.register_forward_hook(fn)
 
+
 def Extract_features(model,device, dataloader):
     model.eval()
     model.to(device)
@@ -135,10 +138,12 @@ def Extract_features(model,device, dataloader):
         batch = batch.to(device)
         _ = model(batch)
 
+
 def Explained_variance(y_true, y_pred):
     total_var = np.var(y_true,axis=0)
     residual_var = np.sum((y_pred - y_true)**2,axis=0)/y_true.shape[0]
     return 1 - np.mean(residual_var/total_var)
+
 
 def Pearson_correlation(y_true, y_pred):
     mean_corr = 0
@@ -147,6 +152,23 @@ def Pearson_correlation(y_true, y_pred):
         mean_corr += corr
     mean_corr /= y_true.shape[1]
     return mean_corr
+
+
+def convert_imgs_into_file(image_folder):
+    image_files = os.listdir(image_folder)
+    image_files.sort(key=lambda x: int(x.split(os.sep)[-1].split('.')[0]))
+    image_files = [os.path.join(image_folder, f) for f in image_files]
+
+    result = []
+    for i, img_path in enumerate(tqdm(image_files)):
+        img = Image.open(img_path)
+        img = img.resize((224, 224))
+        img = np.array(img)
+        result.append(img)
+
+    result = np.array(result)
+    print(result.shape)
+    return result
 
 
 
