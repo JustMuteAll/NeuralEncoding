@@ -17,7 +17,7 @@ For basic encoding analysis, using:
 ```
 python Codes/Encoding.py --model_name 'alexnet' --feature_layer 'fc6' --weights_available 'False' --reg_type 'Ridge' --reg_para '1000'
 ```
-You can choose model and regresssion setting in the command line parameters, network and layers available are listed in the function _Register_hook_ in the_ utils.py_.
+You can choose model and regresssion setting in the command line parameters, network and layers available are listed in the function _Register_hook_ in the _utils.py_.
 Besides, different kinds of processing for a whole dataset or a training-test split are available.  
 
 #### Searching for the best parameters combination
