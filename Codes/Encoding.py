@@ -106,6 +106,7 @@ def main():
         tr_feat = scaler.transform(tr_feat)
         reg.fit(tr_feat, tr_Resp)
         tr_pred = reg.predict(tr_feat)
+        tr_Resp, tr_pred = tr_Resp.reshape(tr_feat.shape[0],-1), tr_pred.reshape(tr_feat.shape[0],-1)
         Train_EV = Explained_variance(tr_Resp, tr_pred)
         Train_R = Pearson_correlation(tr_Resp, tr_pred)
         print("R^2(Explained variance) for Train_Resp: ", Train_EV)
@@ -114,12 +115,13 @@ def main():
         # Test model
         te_feat = scaler.transform(te_feat)
         te_pred = reg.predict(te_feat)
+        te_Resp, te_pred = te_Resp.reshape(te_feat.shape[0],-1), te_pred.reshape(te_feat.shape[0],-1)
         Test_EV = Explained_variance(te_Resp, te_pred)
         Test_R = Pearson_correlation(te_Resp, te_pred)
         print("R^2(Explained variance) for Test_Resp: ", Test_EV)
         print("Pearson correlation for Test_Resp: ", Test_R)
 
-        np.save("pred_response.npy", te_pred)
+        np.save("../Data/{}/pred_response.npy".format("YourResultFolder"), te_pred)
 
     else:
         # Set image and response path, generate dataloader
@@ -155,13 +157,12 @@ def main():
             tr_feat = scaler.transform(tr_feat)
             reg.fit(tr_feat, tr_Resp)
             tr_pred = reg.predict(tr_feat)
-            Train_EV = Explained_variance(tr_Resp, tr_pred)
-            Train_R = Pearson_correlation(tr_Resp, tr_pred)
-
+            
             # Test model
             te_feat = scaler.transform(te_feat)
             te_pred = reg.predict(te_feat).reshape(-1)
             pred_response.append(te_pred)
+            te_Resp, te_pred = te_Resp.reshape(te_feat.shape[0],-1), te_pred.reshape(te_feat.shape[0],-1)
             Test_EV = Explained_variance(te_Resp, te_pred)
             Test_R = Pearson_correlation(te_Resp, te_pred)
             mean_corr += Test_R
@@ -169,7 +170,7 @@ def main():
 
         print("Mean Pearson correlation for Test_Resp: ", mean_corr/Resp.shape[0])
         print("Mean R^2(Explained variance) for Test_Resp: ", mean_EV/Resp.shape[0])
-        np.save("pred_response.npy", pred_response)
+        np.save("../Data/{}/pred_response.npy".format("YourResultFolder"), pred_response)
 
     end_time = time.time()
     print("Total Time:", end_time - start_time)
