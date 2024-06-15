@@ -4,6 +4,7 @@ This repository contains python codes for neural response encoding analysis.
 ## Environment setup
 You can create conda environment using environment.yml in the main directory by 
 ```conda env create -f environment.yaml``` 
+
 It is an extensive environment and may include redundant libraries. You may also create environment by checking requirements yourself, an anaconda environment with pytorch and basic data science packages is enough.
 
 ## Data preparation
