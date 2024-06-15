@@ -1,32 +1,38 @@
-# NeuralResponseEncoding
+# NeuralEncoding
 This repository contains python codes for neural response encoding analysis. 
 
-## Method of deep neural network features extraction
-The feature extracting module used in this repository is torchlens, a new open-source Python package for extracting and characterizing hidden-layer activations in PyTorch models. 
-
-The Github link of this module is:  https://github.com/johnmarktaylor91/torchlens 
-
 ## Environment setup
-An anaconda environment with pytorch and basic data science packages is enough, here we list the main required packages:
-- Numpy
-- Pillow
-- Scikit-learn
-- Scipy.io
-- Torch
-- Torchlens == 0.1.2
-- Torchvision
+You can create conda environment using environment.yml in the main directory by entering conda env create -f environment.yml . It is an extensive environment and may include redundant libraries. You may also create environment by checking requirements yourself, an anaconda environment with pytorch and basic data science packages is enough.
+
+## Data preparation
+For encoding analysis, you should provide images and neural responses in your experiment.Images should be converted into one .mat or .npy file(Or two files, if there is explicit training/test set split in your experiment),and the index of images and neural responses file should be aligned.    
+
+## Step of encoding analysis
+For most following analysis, you need to set the data file path in the codes by yourself.
+
+#### Basic encoding
+For basic encoding analysis, using:
+```
+python Codes/Encoding.py --model_name 'alexnet' --feature_layer 'relu_6_19' --weights_available 'False' --reg_type 'Ridge' --reg_para '1000'
+```
+You can choose model and regresssion setting in the command line parameters, and different kinds of processing for a whole dataset or a training-test split are available.  
+
+#### Searching for the best parameters combination
+Find the best network & layer, regression type, regression parameters for encoding by:
+```
+python Codes/Encoding_search.py
+```
+
+#### Predicting neural response for a novel dataset
+Construct encoding model by your dataset, and predict neural response for a novel dataset using:
+'''
+python Codes/Encoding_dataset.py
+'''
+
+#### Show images eliciting the maximal or the minimum response
+After encoding analysis, show which images elicited the maximal or the minimum response of a neuron and the result predicted by encoding model using:
+```
+python Codes/Select.py
+```
 
 
-## Steps of encoding analysis
-1. Prepare images and neural responses used in encoding analysis.
-2. If you are working on a network-unreachable device, for example, on a hpc server, please download pretrained model weights to your local path and set weights path mannually in the function "load_pretrained_model".
-3. To determine the name of layer you want to extract features from, run the code 'Visualize.py'. 
-4. Run the encoding python code and set the command line parameter to get the result you want, for example:
-   ```
-   python LR_encoding.py --model_name 'alexnet' --feature_layer 'relu_6_19' --weights_available 'True' --reg_type 'Ridge' --reg_para '3000'
-   ```
-
-## Functions available & Plan to do
-Now you can use pretrained models in the module 'torchvision.models' as image encoder, extract activations of the specific layer and train linear encoders to predict neural response of test images. 
-
-Next I will try to make clip-trained model and ViT(Visual image transformer) available for encoding analysis. Besides, more kinds of readout layer will be added.
