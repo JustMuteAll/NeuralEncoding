@@ -8,23 +8,6 @@ from PIL import Image
 import torch
 from torch.utils.data import Dataset, DataLoader
 
-# class ImageDataset(Dataset):
-#     def __init__(self, image_paths, transform=None):
-#         self.image_paths = image_paths
-#         self.transform = transform
-
-#     def __len__(self):
-#         return len(self.image_paths)
-
-#     def __getitem__(self, index):
-#         image_path = self.image_paths[index]
-#         image = Image.open(image_path)
-#         if image.mode != 'RGB':
-#             image = image.convert('RGB')
-#         if self.transform:
-#             image = self.transform(image)
-#         return image
-
 class ImageDataset(Dataset):
     def __init__(self, images, transform=None):
         self.images = images
@@ -66,36 +49,6 @@ def Load_images(path):
             image_paths.append(os.path.join(root, file))
     return sorted(np.array(image_paths), key=lambda x: int(x.split(os.sep)[-1].split('.')[0]))
 
-# def generate_dataloader(image_paths, batch_size=10,preprocess=None):
-#     dataset = ImageDataset(image_paths,preprocess)
-#     dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     return dataloader
-
-# def train_test_split(image_paths, train_idx, test_idx, batch_size=10,preprocess=None):
-#     train_paths, test_paths = image_paths[train_idx], image_paths[test_idx]
-#     Train_dataset = ImageDataset(train_paths,preprocess)
-#     Test_dataset = ImageDataset(test_paths,preprocess)
-#     Train_dataloader = DataLoader(Train_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     Test_dataloader = DataLoader(Test_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     return Train_dataloader, Test_dataloader
-
-
-
-# def generate_dataloader_split(image_folder, response, split_ratio=0.2, batch_size=10, preprocess=None):
-
-#     image_paths = Load_images(image_folder)
-#     test_idx = np.sort(np.random.choice(len(image_paths), int(len(image_paths)*split_ratio), replace=False))
-#     train_idx = np.setdiff1d(np.arange(len(image_paths)), test_idx)
-
-#     train_image_paths, test_image_paths = image_paths[train_idx], image_paths[test_idx]
-#     train_response, test_response = response[train_idx], response[test_idx]
-    
-#     Train_dataset = ImageDataset(train_image_paths,preprocess)
-#     Test_dataset = ImageDataset(test_image_paths,preprocess)
-#     Train_dataloader = DataLoader(Train_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     Test_dataloader = DataLoader(Test_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-
-#     return Train_dataloader, Test_dataloader, train_response, test_response
 
 def Load_data_from_file(data_file):
     if data_file.endswith('.npy'):
@@ -111,29 +64,6 @@ def Load_data_from_file(data_file):
             data = data[key_name][:]
     return data
 
-# def generate_dataloader(train_folder, test_folder, batch_size=10,preprocess=None):
-#     train_image_paths = Load_images(train_folder)
-#     test_image_paths = Load_images(test_folder)
-#     Train_dataset = ImageDataset(train_image_paths,preprocess)
-#     Test_dataset = ImageDataset(test_image_paths,preprocess)
-#     Train_dataloader = DataLoader(Train_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     Test_dataloader = DataLoader(Test_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     return Train_dataloader, Test_dataloader
-
-# def generate_dataloader_splited(tr_image_file, te_image_file, tr_response_file, te_response_file, batch_size=10, preprocess=None):
-#     # Load images from file
-#     tr_images = Load_data_from_file(tr_image_file)
-#     te_images = Load_data_from_file(te_image_file)
-#     tr_resp = Load_data_from_file(tr_response_file)
-#     te_resp = Load_data_from_file(te_response_file)
-
-#     Train_dataset = ImageDataset_fromfile(tr_images,preprocess)
-#     Test_dataset = ImageDataset_fromfile(te_images,preprocess)
-
-#     Train_dataloader = DataLoader(Train_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-#     Test_dataloader = DataLoader(Test_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
-
-#     return Train_dataloader, Test_dataloader, tr_resp, te_resp
 
 def generate_dataloader(image_file, response_file, batch_size=10, preprocess=None):
         
