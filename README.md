@@ -10,10 +10,10 @@ It is an extensive environment and may include redundant libraries. You may also
 For encoding analysis, you should provide images and neural responses in your experiment.Images and response should be converted into .mat or .npy format,and the index of images and neural responses file should be aligned.    
 
 ## GUI 
-Use GUI to simplify the analysis by '''python Codes/app.py'''.
+Use GUI to simplify procedures of analysis by ```python Codes/app.py```.
 
 ## Step of encoding analysis
-For most following analysis, you need to set the data file path in the codes by yourself.
+You can also complete analysis by running separate codes when GUI is unavailable. For most following analysis, you need to set the data file path in the codes by yourself.
 
 #### Basic encoding
 For basic encoding analysis, using:
