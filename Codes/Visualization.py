@@ -71,7 +71,6 @@ def Visualization(image_file, resp_file, para_dict):
     # Using encoding model to predict response for masked images, then compute the weight map
     feat_masked = pca.transform(feat_masked)
     pred_resp_rise = reg.predict(feat_masked)[:, unit_num]
-    print(pred_resp_rise.shape)
 
     wmap = np.zeros((224,224))
     for j in range(im_.shape[2]):
@@ -106,7 +105,7 @@ if __name__ == '__main__':
     args.add_argument('--reg_type', default='Ridge', type=str)
     args.add_argument('--reg_para', default=1000, type=float)
     args.add_argument('--unit_num', default=0, type=int)
-    args.add_argument('--num_extreme', default=5, type=int)
+    args.add_argument('--img_idx', default=5, type=int)
 
     # Set parameters
     Parser = args.parse_args()
@@ -115,7 +114,7 @@ if __name__ == '__main__':
     reg_type = str(Parser.reg_type)
     reg_para = float(Parser.reg_para)
     unit_num = int(Parser.unit_num)
-    num_extreme = int(Parser.num_extreme)
+    img_idx = int(Parser.img_idx)
 
     # Preprocess settings
     default_preprocess = transforms.Compose([
@@ -133,13 +132,12 @@ if __name__ == '__main__':
 
     # Load model
     model = load_pretrained_model(model_name).to(device).eval()
-    Register_hook(model, model_name, feature_layer, fn)
     preprocess = default_preprocess
     pca_used = True
     reg = Register_regression(reg_type, reg_para)
-    para_dict = {'preprocess': preprocess, 'model': model, 'model_name': model_name, 'feature_layer': feature_layer, 'device': device, 'pca_used': pca_used, 'reg': reg, 'unit_num': unit_num, 'num_extreme': num_extreme}
+    para_dict = {'preprocess': preprocess, 'model': model, 'model_name': model_name, 'feature_layer': feature_layer, 'device': device, 'pca_used': pca_used, 'reg': reg, 'unit_num': unit_num, 'img_idx': img_idx}
 
     # Load image and response data
-    image_file = 'your_image_file_path'
-    resp_file = 'your_response_file_path'
+    image_file = 'your path'
+    resp_file = 'your path'
     Visualization(image_file, resp_file, para_dict)
