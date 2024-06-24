@@ -4,6 +4,12 @@ import h5py
 import numpy as np
 import scipy.io as sio
 from PIL import Image
+from tqdm import tqdm
+from sklearn.linear_model import Ridge
+from sklearn.linear_model import Lasso
+from sklearn.cross_decomposition import PLSRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -28,7 +34,6 @@ class ImageDataset(Dataset):
             image = self.transform(image)
         return image
 
-
 def load_pretrained_model(model_name, weights_available=False, weights_path=None):
     # Dynamically import the module based on the model_name
     model_module = importlib.import_module(f'torchvision.models')
@@ -42,7 +47,6 @@ def load_pretrained_model(model_name, weights_available=False, weights_path=None
     else:
         model = model_class(pretrained=True)
     return model    
-
 
 def Load_images(path):
     image_paths = []
@@ -64,11 +68,12 @@ def Load_data_from_file(data_file):
             data = h5py.File(data_file)
             key_name = list(data.keys())[0]
             data = data[key_name][:]
+    
+    if len(data.shape) == 4 and data.shape[2] == 3:
+        data = data.transpose(3,0,1,2)
     return data
 
-
 def generate_dataloader(image_file, response_file, batch_size=10, preprocess=None):
-        
     # Load images from file
     images = Load_data_from_file(image_file)
     resp = Load_data_from_file(response_file)
@@ -76,7 +81,6 @@ def generate_dataloader(image_file, response_file, batch_size=10, preprocess=Non
     image_dataloader = DataLoader(image_dataset, batch_size=batch_size, shuffle=False,pin_memory=True)
 
     return image_dataloader, resp
-
 
 def Register_hook(model, model_name, layer_name,fn):
 
@@ -130,6 +134,14 @@ def Register_hook(model, model_name, layer_name,fn):
         elif layer_name == 'midlayer':
             model.encoder.layers.encoder_layer_13.ln_1.register_forward_hook(fn)
 
+def Register_regression(reg_type, reg_para):
+    if reg_type == 'Ridge':
+        reg = Ridge(alpha=reg_para)
+    elif reg_type == 'Lasso':
+        reg = Lasso(alpha=reg_para)
+    elif reg_type == 'PLS':
+        reg = PLSRegression(n_components=int(reg_para))
+    return reg
 
 def Extract_features(model,device, dataloader):
     model.eval()
@@ -138,12 +150,11 @@ def Extract_features(model,device, dataloader):
         batch = batch.to(device)
         _ = model(batch)
 
-
 def Explained_variance(y_true, y_pred):
     total_var = np.var(y_true,axis=0)
     residual_var = np.sum((y_pred - y_true)**2,axis=0)/y_true.shape[0]
-    return 1 - np.mean(residual_var/total_var)
-
+    ev = (total_var-residual_var)/total_var
+    return np.mean(ev)
 
 def Pearson_correlation(y_true, y_pred):
     mean_corr = 0
@@ -152,7 +163,6 @@ def Pearson_correlation(y_true, y_pred):
         mean_corr += corr
     mean_corr /= y_true.shape[1]
     return mean_corr
-
 
 def convert_imgs_into_file(image_folder):
     image_files = os.listdir(image_folder)
@@ -170,6 +180,43 @@ def convert_imgs_into_file(image_folder):
     print(result.shape)
     return result
 
+def CrossValidationEncoding(CV, feature, resp, pca_used=True, reg=None):
 
+    n_samples = resp.shape[0]
+    permuted_idx = np.random.permutation(n_samples)
+    mean_val_EV, mean_val_R = 0, 0
+    pred_resp = np.zeros_like(resp)
+    for iter in range(CV):
+        # Split the data into training and validation set
+        val_idx = permuted_idx[int(iter*n_samples/CV):int((iter+1)*n_samples/CV)]
+        tr_idx = np.setdiff1d(permuted_idx, val_idx)
+        tr_feat, val_feat = feature[tr_idx], feature[val_idx]
+        tr_Resp, val_Resp = resp[tr_idx], resp[val_idx]
 
+        # PCA
+        if pca_used:
+            pca = PCA(n_components=100)
+            pca.fit(tr_feat)
+            tr_feat = pca.transform(tr_feat)
+            val_feat = pca.transform(val_feat)
 
+        # Train model
+        scaler = StandardScaler()
+        scaler.fit(tr_feat)
+        tr_feat = scaler.transform(tr_feat)
+        reg.fit(tr_feat, tr_Resp)
+        tr_pred = reg.predict(tr_feat)
+
+        # Test model
+        val_feat = scaler.transform(val_feat)
+        val_pred = reg.predict(val_feat)
+        pred_resp[val_idx] = val_pred
+        val_EV = Explained_variance(val_Resp, val_pred)
+        mean_val_EV += val_EV
+        val_R = Pearson_correlation(val_Resp, val_pred)
+        mean_val_R += val_R
+
+    mean_val_EV /= CV
+    mean_val_R /= CV
+
+    return pred_resp, mean_val_EV, mean_val_R
