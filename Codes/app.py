@@ -1,3 +1,4 @@
+import os
 import sys
 import torch
 import numpy as np
@@ -388,7 +389,8 @@ class ParameterDialog(QDialog):
         self.setWindowTitle("Parameters Choosing")
         
         self._layout = QVBoxLayout()
-
+        if os.path.exists('SoyoCry.jpg'):
+            self.setWindowIcon(QIcon('SoyoCry.jpg'))
         self.image_path_label = QLabel("Image File:")
         self.image_path_combo = QComboBox()
         self.image_path_combo.addItems(image_paths)
@@ -610,7 +612,8 @@ class Main_interface(QMainWindow):
         self.init_UI()
     
     def init_UI(self):
-        self.setWindowIcon(QIcon('Soyorin.jpg'))
+        if os.path.exists('SoyoStare.jpg'):
+            self.setWindowIcon(QIcon('SoyoStare.jpg'))
         self.table_1 = QTableWidget(self)
         self.table_1.setGeometry(175, 160, 450, 192)
         self.table_1.setColumnCount(2)
